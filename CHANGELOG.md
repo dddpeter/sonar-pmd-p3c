@@ -1,3 +1,16 @@
+# 3.5.1-p3c-1 (2026-11-24)
+
+## What's changed
+Based on upstream sonar-pmd 3.5.1 (PMD 6.55.0, SonarQube 9.9.4 - 10.5+), re-applied the
+Alibaba P3C rule set (p3c-pmd 2.1.0, 56 rules) on top of it.
+
+Migration from the old 3.2.1 fork (SonarQube 6.6 - 7.x era):
+* `pom.xml` / `sonar-pmd-plugin/pom.xml`: p3c-pmd 2.1.0 dependency added, its transitive
+  PMD 6.15 components excluded in favour of the bundled PMD 6.55.0
+* `PmdRulesDefinition`: loads `rules-p3c.xml` and the `pmd-p3c` rule descriptions
+  into the `pmd` repository
+* resources: `rules-p3c.xml`, `pmd.properties` P3C section, `pmd-p3c/*.html`
+
 # Changelog
 
 ## [3.5.1](https://github.com/jborgers/sonar-pmd/tree/3.5.1) (2024-05-07)

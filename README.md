@@ -1,55 +1,38 @@
-# SonarQube PMD Plugin 
+# SonarQube PMD Plugin — P3C Fork
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.sonarsource.pmd/sonar-pmd-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.sonarsource.pmd/sonar-pmd-plugin)
-![Build Status](https://github.com/jborgers/sonar-pmd/actions/workflows/build.yml/badge.svg)
+基于上游 [jborgers/sonar-pmd 3.5.1](https://github.com/jborgers/sonar-pmd) 构建的
+SonarQube PMD 插件，内置 **阿里巴巴 Java 开发规范（P3C）** 规则集。
 
-Sonar-PMD is a plugin that provides coding rules from [PMD](https://pmd.github.io/) for use in SonarQube.
+## 兼容性
 
-Starting April 2022, the project has found a new home. We, [jborgers](https://github.com/jborgers) and [stokpop](https://github.com/stokpop), 
-aim to provide an active project and well-maintained sonar-pmd plugin. It is now sponsored by [Rabobank](https://www.rabobank.com/).
+| 项目 | 版本 |
+|---|---|
+| 插件版本 | 3.5.1-p3c-1 |
+| 基线 | 上游 sonar-pmd 3.5.1 |
+| PMD | 6.55.0 |
+| P3C | p3c-pmd 2.1.0（56 条规则） |
+| Min. SonarQube | 9.9.4 |
+| Max. SonarQube | 10.5+（SonarQube 10.7 已验证可加载 9.14 API 插件） |
+| Java | JDK 11+ 编译，SonarQube 10.x（Java 17/21）运行 |
 
-For a list of all rules and their status, see: [RULES.md](https://github.com/jborgers/sonar-pmd/blob/master/docs/RULES.md)
+> 注意：不要升级到 sonar-pmd 4.x（PMD 7），P3C 规则是 PMD 6 实现，不兼容。
 
-## Installation
-The plugin should be available in the SonarQube marketplace and is preferably installed from within SonarQube (Administration -->  Marketplace --> Search _pmd_).
+## 构建
 
-This plugin is available again from the Marketplace with the release of version 3.4.0.
-Alternatively, download the [latest JAR file](https://github.com/jborgers/sonar-pmd/releases/latest), put it into the plugin directory (`./extensions/plugins`) and restart SonarQube.
+```bash
+mvn -pl sonar-pmd-plugin -am package
+# 产物: sonar-pmd-plugin/target/sonar-pmd-plugin-3.5.1-p3c-1.jar
+```
 
-## Usage
-Usage should be straight forward:
-1. Activate some PMD rules in your quality profile.
-2. Run an analysis.
+## 安装
 
-### Java version
-Sonar-PMD analyzes the given source code with the Java source version defined in your Gradle or Maven project.
-In case you are not using one of these build tools, or if that does not match the version you are using, set the `sonar.java.source` property to tell PMD which version of Java your source code complies to. 
+将 jar 放入 SonarQube 的 `extensions/plugins/`（或 `extensions/downloads/`）目录并重启，
+在质量配置中启用 PMD 仓库中带 `[p3c]` 前缀的规则。
 
-Possible values : 1.6 to 1.8/8 to 20-preview
+## 与上游的差异（P3C 移植点）
 
-## Table of supported versions
-| Sonar-PMD Plugin       | 3.1.x | 3.3.x  | 3.4.0           | 3.5.0         | 3.5.1         | 4.0.0 (planned) |
-|------------------------|-------|--------|-----------------|---------------|---------------|-----------------|
-| PMD                    | 6.9.0 | 6.30.0 | 6.45.0          | 6.55.0        | 6.55.0        | 7.1.0           |
-| Max. Java Version      | 11    | 15     | 18              | 20-preview *2 | 20-preview *2 | 22              |
-| Min. SonarQube Version | 6.6   | 6.7    | _8.9(*1)_ / 9.3 | 9.8           | 9.9.4         | 10.0            |
-| Max. SonarQube Version |       |        | 9.9             | 10.4          | 10.5+         | 10.5+           |
-
-(*1) Note: Plugin version 3.4.x runs in SonarQube 8.9, however, Java 17+ is only fully supported in SonarQube 9.3+.   
-(*2) Note: Supports all tested Java 21 features; on parsing errors, warns instead of breaks 
-
-A majority of the PMD rules have been rewritten in the Sonar Java plugin. Rewritten rules are marked "Deprecated" in the PMD plugin, but a [concise summary of replaced rules](http://dist.sonarsource.com/reports/coverage/pmd.html) is available.
-
-## Rules on test
-PMD tool provides some rules that can check the code of JUnit tests. Please note that these rules (and only these rules) will be applied only on the test files of your project.
-
-## License
-Sonar-PMD is licensed under the [GNU Lesser General Public License, Version 3.0](https://github.com/jborgers/sonar-pmd/blob/master/LICENSE.md).
-
-Parts of the rule descriptions displayed in SonarQube have been extracted from [PMD](https://pmd.github.io/) and are licensed under a [BSD-style license](https://github.com/pmd/pmd/blob/master/LICENSE).  
-
-## Build and test the plugin
-To build the plugin and run the integration tests:
-
-    ./mvnw clean verify
-   
+1. `sonar-pmd-plugin/pom.xml` — 新增 `com.alibaba.p3c:p3c-pmd:2.1.0` 依赖（排除其传递的 PMD 组件）
+2. `PmdRulesDefinition` — 在 `pmd` 仓库中额外加载 `rules-p3c.xml` + P3C 描述
+3. `resources/org/sonar/plugins/pmd/rules-p3c.xml` — 56 条 P3C 规则注册
+4. `resources/org/sonar/l10n/pmd.properties` — P3C 规则名称（`[p3c]` 前缀）
+5. `resources/org/sonar/l10n/pmd/rules/pmd-p3c/*.html` — P3C 规则描述
